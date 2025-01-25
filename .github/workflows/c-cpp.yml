@@ -1,0 +1,55 @@
+name: C++ License Scanner Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout code from the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 2: Set up C++ environment (with required dependencies like CMake and GCC)
+      - name: Set up C++ environment
+        uses: actions/setup-cpp@v1
+        with:
+          compiler: 'gcc'  # or clang if preferred
+
+      # Step 3: Install dependencies (CMake and Make)
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ make
+
+      # Step 4: Build the project using CMake
+      - name: Build project
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make
+
+      # Step 5: Run the scanner (You can customize this based on your test data)
+      - name: Run scanner with test data
+        run: |
+          mkdir -p /tmp/test_data
+          echo "This is a test file with the MIT License." > /tmp/test_data/test_file.txt
+          cd build
+          ./license-scanner /tmp/test_data "MIT License"
+        
+      # Step 6: Verify log output (as part of a basic test)
+      - name: Verify log output
+        run: |
+          grep "Match found" scan_results.log
+          
+      # Step 7: Optional - Clean up log files after the test
+      - name: Clean up log file
+        run: |
+          rm scan_results.log
